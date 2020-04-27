@@ -1,7 +1,7 @@
 package salesforce_client
 
 import (
-	"bitbucket.org/dimanlin/salesforce_marttix_client/internal/sql"
+	"github.com/dimanlin/salesforce_martiix_client/internal/sql"
 	"github.com/simpleforce/simpleforce"
 )
 

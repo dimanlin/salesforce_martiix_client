@@ -1,8 +1,8 @@
 package salesforce_marttix_client
 
 import (
-	"bitbucket.org/dimanlin/salesforce_marttix_client/internal/auth"
-	"bitbucket.org/dimanlin/salesforce_marttix_client/pkg/salesforce_client"
+	"github.com/dimanlin/salesforce_martiix_client/internal/auth"
+	"github.com/dimanlin/salesforce_martiix_client/pkg/salesforce_client"
 )
 
 func CreateMClient(host string, email string, password string, api_version string) salesforce_client.Smc {

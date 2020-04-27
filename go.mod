@@ -1,4 +1,4 @@
-module bitbucket.org/dimanlin/salesforce_marttix_client
+module github.com/dimanlin/salesforce_martiix_client
 
 go 1.14
 
