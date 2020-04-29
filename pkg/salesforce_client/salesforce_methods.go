@@ -1,6 +1,7 @@
 package salesforce_client
 
 import (
+	"fmt"
 	"github.com/dimanlin/salesforce_martiix_client/internal/sql"
 	"github.com/simpleforce/simpleforce"
 )
@@ -9,14 +10,30 @@ type Smc struct {
 	Client simpleforce.Client
 }
 
+type Marttix struct {
+	Id string
+	CallCenterPlatform string
+	Name string
+	Status string
+	Version string
+}
+
+func (marti *Marttix) IdExist() bool {
+	if len(marti.Id) > 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
 type Client struct {
+	Id string
 	AccessCodeValidationRequired bool
 	CallCenterPlatform string
 	ContactEmail string
 	ContactName string
 	ContactPhoneNumber string
 	CreatedDate string
-	Id string
 	MicroCallCenterRouterWorkspaceId string
 	MicroCallCenter bool
 	Name string
@@ -35,22 +52,51 @@ type Client struct {
 	TechnicalSupportNumber string
 }
 
-func (sfc *Smc) GetClientByEmail(email string) (*simpleforce.QueryResult, error) {
+func (sfc *Smc) GetClientByEmail(email string) (Client, error) {
 	query := sql.Select + sql.ClientFields + sql.FromClient + " WHERE Contact_Email__c = " + "'" + email + "'"
 	var results, err = sfc.Client.Query(query)
-	return results, err
+	if err != nil {
+		fmt.Println("Error: ", err)
+		client := Client{}
+		return client, err
+	}
+	clients := parseClientRecord(results)
+	return (*clients)[0], err
 }
 
-//func parseRecord(*simpleforce.QueryResult) {
-//
-//}
+func parseMatriixRecord(results *simpleforce.QueryResult) *[]Marttix {
+	var martiixs []Marttix
+	for _, record := range results.Records {
+		martiix := Marttix{}
 
-func (sfc *Smc) GetClientAll() (*[]Client, error) {
-	query := sql.Select + sql.ClientFields + sql.FromClient
-	var results, err = sfc.Client.Query(query)
+		if record["Call_Center_Platform__c"] != nil {
+			martiix.CallCenterPlatform = record["Call_Center_Platform__c"].(string)
+		}
 
+		if record["Id"] != nil {
+			martiix.Id = record["Id"].(string)
+		}
+
+		if record["Name"] != nil {
+			martiix.Name = record["Name"].(string)
+		}
+
+		if record["Status__c"] != nil {
+			martiix.Status = record["Status__c"].(string)
+		}
+
+		if record["Version__c"] != nil {
+			martiix.Version = record["Version__c"].(string)
+		}
+
+		martiixs = append(martiixs, martiix)
+	}
+
+	return &martiixs
+}
+
+func parseClientRecord(results *simpleforce.QueryResult) *[]Client {
 	var clients []Client
-
 	for _, record := range results.Records {
 		var client Client
 		if record["Access_Code_Validation_Required__c"] != nil {
@@ -61,15 +107,15 @@ func (sfc *Smc) GetClientAll() (*[]Client, error) {
 			client.CallCenterPlatform = record["Call_Center_Platform__c"].(string)
 		}
 
-		if record["ContactEmail"] != nil {
+		if record["Contact_Email__c"] != nil {
 			client.ContactEmail = record["Contact_Email__c"].(string)
 		}
 
-		if record["ContactName"] != nil {
+		if record["Contact_Name__c"] != nil {
 			client.ContactName = record["Contact_Name__c"].(string)
 		}
 
-		if record["ContactPhoneNumber"] != nil {
+		if record["Contact_Phone_Number__c"] != nil {
 			client.ContactPhoneNumber = record["Contact_Phone_Number__c"].(string)
 		}
 
@@ -151,30 +197,45 @@ func (sfc *Smc) GetClientAll() (*[]Client, error) {
 
 		clients = append(clients, client)
 	}
-	return &clients, err
+	return &clients
 }
 
-func (sfc *Smc) GetAllMarttis() (*simpleforce.QueryResult, error) {
+func (sfc *Smc) GetClientAll() (*[]Client, error) {
+	query := sql.Select + sql.ClientFields + sql.FromClient
+	var results, err = sfc.Client.Query(query)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+	clients := parseClientRecord(results)
+	return clients, err
+}
+
+func (sfc *Smc) GetAllMarttix() *[]Marttix {
 	query := sql.Select + sql.MarttiFields + sql.FromMartti
 	var results, err = sfc.Client.Query(query)
-	return results, err
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+
+	martiix := parseMatriixRecord(results)
+	return martiix
 }
 
-func (sfc *Smc) GetClientsByMarttiId(martiixId string) (*simpleforce.QueryResult, error) {
-	query := "SELECT Id, Client__r.Id, Client__r.Name__c, Client__r.Micro_Call_Center__c, Client__r.Physical_Address_State__c FROM MARTTIX__c WHERE Id = '" + martiixId + "'"
-	var results, err = sfc.Client.Query(query)
-	return results, err
-}
-//func (sfc *Smc) GetClientsByMarttiId(martiixId string) (*simpleforce.QueryResult, error) {
-//	query := "SELECT MARTTIX__c.Id, Id, Name FROM ClientX__c WHERE MARTTIX__c.Id = '" + martiixId + "'"
-//	var results, err = sfc.Client.Query(query)
-//	return results, err
-//}
-
-//func (sfc *Smc) GetMarttixByClientId(clientId string) (*simpleforce.QueryResult, error) {
+//func (sfc *Smc) GetClientsByMarttixId(martiixId string) (*[]Client, error) {
 //	query := "SELECT Id, Client__r.Id, Client__r.Name__c, Client__r.Micro_Call_Center__c, Client__r.Physical_Address_State__c FROM MARTTIX__c WHERE Id = '" + martiixId + "'"
 //	var results, err = sfc.Client.Query(query)
-//	return results, err
+//	//fmt.Println(results)
+//	clients := parseClientRecord(results)
+//	return clients, err
 //}
 
-
+//func (sfc *Smc) GetClientsByMarttixId(martiixId string) {
+//	//query := "SELECT Id, Client__r.Id, Client__r.Name__c, Client__r.Micro_Call_Center__c, Client__r.Physical_Address_State__c FROM MARTTIX__c WHERE Id = '" + martiixId + "'"
+//	query := "SELECT MARTTIX__c.Id FROM ClientX__c"
+//	var results, _ = sfc.Client.Query(query)
+//	//fmt.Println(results)
+//	for _, record := range results.Records {
+//		// access the record as SObjects.
+//		fmt.Println(record)
+//	}
+//}

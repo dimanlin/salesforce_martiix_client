@@ -48,16 +48,19 @@ func main() {
 	client := CreateMClient("https://test.salesforce.com", "skrn@carenection.com.cvgdev", "Polycom!23dZRpwQlbm5WcRTqks0j8jbOS5", "41.0")
 
 
-	results, err := client.GetClientAll()
-	if err != nil {
-		fmt.Println("Error")
-		return
-	}
-
-	fmt.Println((*results)[0])
-	for i := 0; i < len(*results); i++  {
-		fmt.Println((*results)[i].Id)
-	}
-
+	//results, err := client.GetClientAll()
+	r := client.GetAllMarttix()
+	fmt.Println((*r)[0].IdExist())
+	//
+	//if err != nil {
+	//	fmt.Println("Error")
+	//	return
+	//}
+	//
+	//
+	//for i := 0; i <= len(*results) - 1;  i++ {
+	//		fmt.Println((*results)[i])
+	//}
+	fmt.Println("!")
 }
 
