@@ -10,30 +10,14 @@ type Smc struct {
 	Client simpleforce.Client
 }
 
-type Marttix struct {
-	Id string
-	CallCenterPlatform string
-	Name string
-	Status string
-	Version string
-}
-
-func (marti *Marttix) IdExist() bool {
-	if len(marti.Id) > 0 {
-		return true
-	} else {
-		return false
-	}
-}
-
 type Client struct {
-	Id string
 	AccessCodeValidationRequired bool
 	CallCenterPlatform string
 	ContactEmail string
 	ContactName string
 	ContactPhoneNumber string
 	CreatedDate string
+	Id string
 	MicroCallCenterRouterWorkspaceId string
 	MicroCallCenter bool
 	Name string
@@ -50,6 +34,22 @@ type Client struct {
 	PhysicalLocationCity string
 	Status string
 	TechnicalSupportNumber string
+}
+
+type Marttix struct {
+	Id string
+	CallCenterPlatform string
+	Name string
+	Status string
+	Version string
+}
+
+func (marti *Marttix) IdExist() bool {
+	if len(marti.Id) > 0 {
+		return true
+	} else {
+		return false
+	}
 }
 
 func (sfc *Smc) GetClientByEmail(email string) (Client, error) {
@@ -200,7 +200,7 @@ func parseClientRecord(results *simpleforce.QueryResult) *[]Client {
 	return &clients
 }
 
-func (sfc *Smc) GetClientAll() (*[]Client, error) {
+func (sfc *Smc) GetAllClients() (*[]Client, error) {
 	query := sql.Select + sql.ClientFields + sql.FromClient
 	var results, err = sfc.Client.Query(query)
 	if err != nil {
